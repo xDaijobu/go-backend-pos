@@ -2,18 +2,20 @@ package tokenutil
 
 import (
 	"fmt"
+	"go-backend-pos/domain"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v4"
-	"go-backend-pos/domain"
+	"github.com/google/uuid"
 )
 
 func CreateAccessToken(user *domain.User, secret string, expiry int) (accessToken string, err error) {
 	exp := time.Now().Add(time.Hour * time.Duration(expiry))
 
 	claims := &domain.JwtCustomClaims{
-		Name: user.Name,
-		ID:   user.ID.Hex(),
+		Name:      user.Name,
+		UserID:    user.ID.Hex(),
+		SessionID: uuid.New().String(),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(exp),
 		},
@@ -41,6 +43,23 @@ func CreateRefreshToken(user *domain.User, secret string, expiry int) (refreshTo
 	return rt, err
 }
 
+func ExtractClaimsFromToken(requestToken string, secret string) (*domain.JwtCustomClaims, error) {
+	token, err := jwt.ParseWithClaims(requestToken, &domain.JwtCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(secret), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	claims, ok := token.Claims.(*domain.JwtCustomClaims)
+	if !ok {
+		return nil, err
+	}
+	return claims, nil
+}
+
 func IsAuthorized(requestToken string, secret string) (bool, error) {
 	_, err := jwt.Parse(requestToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -54,23 +73,20 @@ func IsAuthorized(requestToken string, secret string) (bool, error) {
 	return true, nil
 }
 
-func ExtractIDFromToken(requestToken string, secret string) (string, error) {
-	token, err := jwt.Parse(requestToken, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(secret), nil
-	})
-
-	if err != nil {
-		return "", err
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-
-	if !ok && !token.Valid {
-		return "", fmt.Errorf("Invalid Token")
-	}
-
-	return claims["id"].(string), nil
-}
+//func ExtractClaimsFromToken(requestToken string, secret string) (string, error) {
+//	claims, err := ExtractDataFromToken(requestToken, secret)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	return claims.ID, nil
+//}
+//
+//func ExtractSessionIDFromToken(requestToken string, secret string) (string, error) {
+//	claims, err := ExtractDataFromToken(requestToken, secret)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	return claims.SessionID, nil
+//}

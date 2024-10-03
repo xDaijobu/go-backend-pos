@@ -17,13 +17,17 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 			authToken := t[1]
 			authorized, err := tokenutil.IsAuthorized(authToken, secret)
 			if authorized {
-				userID, err := tokenutil.ExtractIDFromToken(authToken, secret)
+				claims, err := tokenutil.ExtractClaimsFromToken(authToken, secret)
 				if err != nil {
 					c.JSON(http.StatusUnauthorized, domain.ErrorResponse{Message: err.Error()})
 					c.Abort()
 					return
 				}
-				c.Set("x-user-id", userID)
+
+				//uaString := c.Request.Header.Get("User-Agent")
+
+				c.Set("x-user-id", claims.UserID)
+				c.Set("x-session-id", claims.SessionID)
 				c.Set("x-auth-token", authToken)
 				c.Next()
 				return

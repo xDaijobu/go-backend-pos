@@ -12,10 +12,10 @@ const (
 
 type Token struct {
 	ID        primitive.ObjectID `bson:"_id" json:"-"`
-	Token     string             `bson:"token" form:"token" binding:"required" json:"title"`
 	UserID    primitive.ObjectID `bson:"userID" binding:"required" json:"-"`
-	CreatedAt primitive.DateTime `bson:"createdAt" binding:"required" json:"-"`
+	Token     string             `bson:"token" form:"token" binding:"required" json:"title"`
 	Blacklist bool               `bson:"blacklist" form:"blacklist" json:"blacklist"`
+	CreatedAt primitive.DateTime `bson:"createdAt" binding:"required" json:"-"`
 }
 
 type TokenRepository interface {
