@@ -9,14 +9,16 @@ import (
 )
 
 type loginUsecase struct {
-	userRepository domain.UserRepository
-	contextTimeout time.Duration
+	userRepository  domain.UserRepository
+	tokenRepository domain.TokenRepository
+	contextTimeout  time.Duration
 }
 
-func NewLoginUsecase(userRepository domain.UserRepository, timeout time.Duration) domain.LoginUsecase {
+func NewLoginUsecase(userRepository domain.UserRepository, tokenRepository domain.TokenRepository, timeout time.Duration) domain.LoginUsecase {
 	return &loginUsecase{
-		userRepository: userRepository,
-		contextTimeout: timeout,
+		userRepository:  userRepository,
+		tokenRepository: tokenRepository,
+		contextTimeout:  timeout,
 	}
 }
 
@@ -26,8 +28,8 @@ func (lu *loginUsecase) GetUserByEmail(c context.Context, email string) (domain.
 	return lu.userRepository.GetByEmail(ctx, email)
 }
 
-func (lu *loginUsecase) CreateAccessToken(user *domain.User, secret string, expiry int) (accessToken string, err error) {
-	return tokenutil.CreateAccessToken(user, secret, expiry)
+func (lu *loginUsecase) CreateAccessToken(c context.Context, user *domain.User, secret string, expiry int) (accessToken string, err error) {
+	return lu.tokenRepository.CreateToken(c, user, secret, expiry, false)
 }
 
 func (lu *loginUsecase) CreateRefreshToken(user *domain.User, secret string, expiry int) (refreshToken string, err error) {
