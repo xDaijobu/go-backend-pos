@@ -2,14 +2,12 @@ package repository
 
 import (
 	"context"
-	"errors"
-	"fmt"
+	"go-backend-pos/internal/tokenutil"
 
 	"go-backend-pos/domain"
 	"go-backend-pos/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	mongoDB "go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
 
@@ -25,40 +23,39 @@ func NewTokenRepository(db mongo.Database, collection string) domain.TokenReposi
 	}
 }
 
-func (t tokenRepository) CreateToken(c context.Context, accessToken string, userId string, blacklist bool) error {
-	collection := t.database.Collection(t.collection)
+func (t tokenRepository) CreateToken(c context.Context, user *domain.User, accessTokenSecret string, expiry int, blacklist bool) (string, error) {
+	token, err := tokenutil.CreateAccessToken(user, accessTokenSecret, expiry)
 
-	userIdHex, err := primitive.ObjectIDFromHex(userId)
-	if err != nil {
-		return err
-	}
+	collection := t.database.Collection(t.collection)
 
 	_, err = collection.InsertOne(c, domain.Token{
 		ID:        primitive.NewObjectID(),
-		Token:     accessToken,
-		UserID:    userIdHex,
+		Token:     token,
+		UserID:    user.ID,
+		Expiry:    primitive.NewDateTimeFromTime(time.Now().Add(time.Hour * time.Duration(expiry))),
 		Blacklist: blacklist,
 		CreatedAt: primitive.NewDateTimeFromTime(time.Now()),
 	})
 
-	return err
+	return token, err
 }
 
 func (t tokenRepository) InvalidateToken(c context.Context, accessToken string, userId string) error {
 	token, err := t.FetchByToken(c, accessToken)
 	if err != nil {
-		fmt.Print(err)
-		if errors.Is(err, mongoDB.ErrNoDocuments) {
-			err = t.CreateToken(c, accessToken, userId, true)
-			if err != nil {
-				return err
-			}
-
-			token, err = t.FetchByToken(c, accessToken)
-			if err != nil {
-				return err
-			}
-		}
+		//fmt.Print(err)
+		//if errors.Is(err, mongoDB.ErrNoDocuments) {
+		//
+		//	_, err = t.CreateToken(c, accessToken, userId, true)
+		//	if err != nil {
+		//		return err
+		//	}
+		//
+		//	token, err = t.FetchByToken(c, accessToken)
+		//	if err != nil {
+		//		return err
+		//	}
+		//}
 
 		return err
 	}
