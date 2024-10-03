@@ -25,9 +25,10 @@ func (tc *CategoryController) Create(c *gin.Context) {
 		c.JSON(http.StatusConflict, domain.ErrorResponse{Message: "Category already exists with the given name"})
 		return
 	}
-
+	userID := c.GetString("x-user-id")
 	category.ID = primitive.NewObjectID()
 	category.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
+	category.CreatedBy = userID
 
 	err = tc.CategoryUsecase.Create(c, &category)
 	if err != nil {
@@ -40,7 +41,7 @@ func (tc *CategoryController) Create(c *gin.Context) {
 	})
 }
 
-func (tc *CategoryController) Fetch(c *gin.Context) {
+func (tc *CategoryController) FetchAll(c *gin.Context) {
 	categories, err := tc.CategoryUsecase.FetchAll(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})

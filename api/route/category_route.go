@@ -19,5 +19,5 @@ func NewCategoryRouter(env *bootstrap.Env, timeout time.Duration, db mongo.Datab
 	}
 
 	group.POST("/category", tc.Create)
-	group.GET("/category", tc.Fetch)
+	group.GET("/category", tc.FetchAll)
 }

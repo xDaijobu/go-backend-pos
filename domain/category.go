@@ -13,7 +13,9 @@ type Category struct {
 	ID        primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Name      string             `json:"name" bson:"name" binding:"required" form:"name"`
 	CreatedAt primitive.DateTime `json:"created_at" bson:"created_at"`
+	CreatedBy string             `json:"created_by" bson:"created_by"`
 	UpdatedAt primitive.DateTime `json:"updated_at" bson:"updated_at"`
+	UpdatedBy string             `json:"updated_by" bson:"updated_by"`
 }
 
 type CategoryRepository interface {
