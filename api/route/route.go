@@ -23,4 +23,5 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db mongo.Database, gin *gi
 	NewProfileRouter(env, timeout, db, protectedRouter)
 	NewTaskRouter(env, timeout, db, protectedRouter)
 	NewLogoutRouter(env, timeout, db, protectedRouter)
+	NewCategoryRouter(env, timeout, db, protectedRouter)
 }
