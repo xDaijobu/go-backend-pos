@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/domain"
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/internal/tokenutil"
 	"github.com/gin-gonic/gin"
+	"go-backend-pos/domain"
+	"go-backend-pos/internal/tokenutil"
 )
 
 func JwtAuthMiddleware(secret string) gin.HandlerFunc {
@@ -24,6 +24,7 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 					return
 				}
 				c.Set("x-user-id", userID)
+				c.Set("x-auth-token", authToken)
 				c.Next()
 				return
 			}

@@ -5,11 +5,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/domain"
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/mongo/mocks"
-	"github.com/amitshekhariitbhu/go-backend-clean-architecture/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"go-backend-pos/domain"
+	"go-backend-pos/mongo/mocks"
+	"go-backend-pos/repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

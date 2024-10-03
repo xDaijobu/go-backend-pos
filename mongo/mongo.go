@@ -200,3 +200,5 @@ func (mr *mongoCursor) Decode(v interface{}) error {
 func (mr *mongoCursor) All(ctx context.Context, result interface{}) error {
 	return mr.mc.All(ctx, result)
 }
+
+var ErrNoDocuments = errors.New("mongo: no documents in result")
